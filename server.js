@@ -117,24 +117,29 @@ wss.on('connection', function connection(ws, request) {
     });
 });
 
-// Start the server
-server.listen(PORT, HOST, () => {
-    console.log(`\n========================================`);
-    console.log(`  WebSocket Server Listening on port ${PORT}`);
-    console.log(`========================================\n`);
+// Export the server for Vercel
+module.exports = server;
 
-    // Get loopback interfaces to show local network IPs
-    const networkInterfaces = os.networkInterfaces();
-    console.log(`To connect from devices on the same network, use one of these addresses:`);
+// Only start the server if this file is run directly (not as a module on Vercel)
+if (require.main === module) {
+    server.listen(PORT, HOST, () => {
+        console.log(`\n========================================`);
+        console.log(`  WebSocket Server Listening on port ${PORT}`);
+        console.log(`========================================\n`);
 
-    for (const interfaceName in networkInterfaces) {
-        const interfaces = networkInterfaces[interfaceName];
-        for (const iface of interfaces) {
-            // Find non-internal IPv4 addresses (Local Network IP)
-            if (iface.family === 'IPv4' && !iface.internal) {
-                console.log(`  -> ws://${iface.address}:${PORT}/driver_123`);
+        // Get loopback interfaces to show local network IPs
+        const networkInterfaces = os.networkInterfaces();
+        console.log(`To connect from devices on the same network, use one of these addresses:`);
+
+        for (const interfaceName in networkInterfaces) {
+            const interfaces = networkInterfaces[interfaceName];
+            for (const iface of interfaces) {
+                // Find non-internal IPv4 addresses (Local Network IP)
+                if (iface.family === 'IPv4' && !iface.internal) {
+                    console.log(`  -> ws://${iface.address}:${PORT}/driver_123`);
+                }
             }
         }
-    }
-    console.log(`\nWaiting for connections...`);
-});
+        console.log(`\nWaiting for connections...`);
+    });
+}
